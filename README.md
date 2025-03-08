@@ -36,3 +36,10 @@ The system consists of two main workflows:
 -   Telegram account
 -   OpenAI API key
 -   Supabase or PostgreSQL database
+
+### Example Commands
+
+-   **Text message**: "I'm taking metformin 500mg twice daily for my diabetes"
+-   **Voice message**: Record a voice note about your symptoms or questions
+-   **Photo**: Send a picture of a prescription or medical report
+-   **Reminder**: "Remind me to take my blood pressure medication at 9pm"
