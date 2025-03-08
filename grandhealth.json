@@ -1,0 +1,920 @@
+{
+  "name": "simple-13.1",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "*"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "id": "eb12af05-3cd9-48f9-bce5-146ec1d2075e",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -740,
+        240
+      ],
+      "typeVersion": 1.1,
+      "webhookId": "1876f5b8-c3b4-4195-bc60-16392db06376",
+      "credentials": {
+        "telegramApi": {
+          "id": "W8sIPFhMIv6Ei28X",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists"
+                    },
+                    "leftValue": "={{ $json.message.voice }}",
+                    "id": "2d606252-0d35-4e01-a39a-a28a7a42bb3b"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "array",
+                      "operation": "exists"
+                    },
+                    "leftValue": "={{ $json.message.photo }}",
+                    "id": "7f7b2d51-5bea-44f3-b7c8-9457cf52642e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists"
+                    },
+                    "leftValue": "={{ $json.message.text }}",
+                    "id": "826dae70-a2bd-40ad-960b-2d2fd1b35c54"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "default"
+        }
+      },
+      "id": "f18e0828-ec99-474a-88fe-58fcbf02edbe",
+      "name": "Message Router",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -600,
+        220
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "d31fedc7-e79d-48fa-8957-ffd22fbb5c27",
+      "name": "Transcribe Voice",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -160,
+        -120
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "k1FEwzROUcfNCTSg",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-2024-11-20",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-2024-11-20"
+        },
+        "inputType": "base64",
+        "options": {}
+      },
+      "id": "dec60c59-0609-45b8-bfb7-d75cd4329be1",
+      "name": "Analyze Photo",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -100,
+        60
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "k1FEwzROUcfNCTSg",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2fb613f-c6c6-409f-bc2b-1106a7b71472",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "57b175ae-5ea3-44cf-b17e-24d75ce109c3",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "cf8d18a2-8634-4a76-8557-344159151932",
+              "name": "userId",
+              "value": "= {{ $json.message.from.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "05599fb1-6478-4e2c-9499-bfba7f0f67ac",
+      "name": "Format Text",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -100,
+        540
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "options": {}
+      },
+      "id": "f5fbb451-5eee-48dd-b853-0c4ba256a962",
+      "name": "Merge Data",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        880,
+        120
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "include": "specifiedFields",
+        "options": {}
+      },
+      "id": "5974a1bc-cfda-427f-bbe0-75d6899394a3",
+      "name": "Aggregate Data",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        1040,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "304b0a03-2be6-4375-9574-15044b68bf77",
+      "name": "Voice Text Converge",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        100,
+        -120
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ae747d5-d2ca-4fdf-b845-2f48a3d1c0c9",
+              "name": "text",
+              "value": "={{ $json.caption }}  \n{{ $json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3796f0d3-be64-42f3-b0d1-d7d70fdbd7e5",
+      "name": "Photo Text Converge",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        200,
+        120
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {}
+      },
+      "id": "1310a4e6-4504-4e5a-848c-40788bb55e09",
+      "name": "GPT-4o-mini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1220,
+        500
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "k1FEwzROUcfNCTSg",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "{{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "77043709-4828-4325-835d-fcf20604e6ec",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1880,
+        260
+      ],
+      "typeVersion": 1.2,
+      "webhookId": "aa720f06-605d-4040-a6cb-938f7b89af55",
+      "credentials": {
+        "telegramApi": {
+          "id": "W8sIPFhMIv6Ei28X",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -340,
+        -40
+      ],
+      "id": "e112810c-8a80-4276-b215-650514cb5bfd",
+      "name": "Voice getter",
+      "webhookId": "f8f97be2-58aa-4f7d-9abe-1f755df86c80",
+      "credentials": {
+        "telegramApi": {
+          "id": "W8sIPFhMIv6Ei28X",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "caption",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        220
+      ],
+      "id": "54537cdf-8fe4-4826-ba75-90045230dbfe",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5200be2a-3452-4ab6-84ca-244f082431f6",
+              "name": "image_file_id",
+              "value": "{{ $json.photo[$json.photo.length - 1].file_id }}",
+              "type": "string"
+            },
+            {
+              "id": "b8e18ae3-6496-46a5-9d71-6ae4315c47ce",
+              "name": "caption",
+              "value": "{{ $json.message.caption }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -280,
+        220
+      ],
+      "id": "0b110f95-8872-4060-8e20-613ed9b568f2",
+      "name": "Image Schema1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        60,
+        120
+      ],
+      "id": "633c2068-d579-4d82-953d-cf13625a3b1d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = {\n  hasData: Array.isArray($input.item.json),\n  dataCount: Array.isArray($input.item.json) ? $input.item.json.length : 0,\n  firstItem: Array.isArray($input.item.json) && $input.item.json.length > 0 ? $input.item.json[0] : null,\n  fullJSON: $input.item.json\n};\n\nconsole.log('Baserow Result:', JSON.stringify(result, null, 2));\nreturn { json: result };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        480
+      ],
+      "id": "828051df-979a-43d1-a147-6c3ec864090d",
+      "name": "Code2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "Memories",
+        "returnAll": true,
+        "filterType": "none"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        580,
+        0
+      ],
+      "id": "e3b21894-9614-4f18-821b-dba6d1b95751",
+      "name": "Retrive Memory",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KfmBfLHEaYE00uY1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "Notes",
+        "returnAll": true,
+        "filterType": "none"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        600,
+        300
+      ],
+      "id": "9cb3bfbb-2a92-463b-b2ee-bd8ad8d26099",
+      "name": "Retrive Notes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KfmBfLHEaYE00uY1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "Memories",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Memory",
+              "fieldValue": "{{ $fromAI('memory', 'memory to be created', 'string') }}"
+            },
+            {
+              "fieldId": "Date Added",
+              "fieldValue": "{{ $now.toISOString() }}"
+            },
+            {
+              "fieldId": "User Id",
+              "fieldValue": "{{ $json.message.from.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        640
+      ],
+      "id": "02979e21-d8e4-43d0-bf20-0b801285a0c1",
+      "name": "Save Memory Tool",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KfmBfLHEaYE00uY1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "Notes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Notes",
+              "fieldValue": "{{ $fromAI('notes', 'note to be created', 'string') }} "
+            },
+            {
+              "fieldId": "Date Added",
+              "fieldValue": "{{ $now.toISOString() }} "
+            },
+            {
+              "fieldId": "User ID",
+              "fieldValue": "{{ $json.message.from.id }} "
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        640
+      ],
+      "id": "4d3662f2-5624-4699-b27f-6a2991970ecc",
+      "name": "Save Notes Tool",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KfmBfLHEaYE00uY1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "{{\n  (() => {\n    try {\n      return $('Edit Fields').item.json.text;\n    } catch (e) {\n      return undefined;\n    }\n  })() ||\n  (() => {\n    try {\n      return $('Edit Fields1').item.json.text;\n    } catch (e) {\n      return undefined;\n    }\n  })() ||\n  (() => {\n    try {\n      return $('Transcribe Recording').item.json.text;\n    } catch (e) {\n      return undefined;\n    }\n  })() ||\n  'default value' // optional default if all are undefined\n}}\n",
+        "options": {
+          "systemMessage": "You are a health assistant that provides friendly, personalized healthcare guidance. Your role is to: remember user health information to provide contextually relevant advice; offer information about medications, treatments, and health practices; help users track their health data, medications, and appointments; provide reminders for medication and healthcare routines; respond to health queries with accurate, accessible information. Always include appropriate medical disclaimers and encourage users to consult healthcare professionals for diagnosis and treatment. Maintain a warm, supportive tone while providing scientifically accurate information."
+        }
+      },
+      "id": "560e2cc4-c853-429e-af14-61120b568f3a",
+      "name": "AI Tools Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1400,
+        260
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "{{ $json.message.from.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1420,
+        560
+      ],
+      "id": "3456447d-b139-4f71-a6dd-ecbf307bd177",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "qI5gaqrBN29FWWnE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8cea32c-a1d5-409c-8ea8-354ea736ff04",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id  ||  $('Telegram Trigger').item.json.message.chat.id  }}   ",
+              "type": "string"
+            },
+            {
+              "id": "40b51bfd-b9a7-48d9-9ed1-e55e7b5e6bed",
+              "name": "currentMessage",
+              "value": "= {{ $('Format Text').item.json.text || $('Voice Text Converge').item.json.text || $('Photo Text Converge').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "8ab362dd-e30e-4295-963e-f5c4d1550582",
+              "name": "historyData",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        220
+      ],
+      "id": "72fc3796-1271-48df-8820-377769ae022d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3ce7a6f1-c8f1-4cdd-b52a-b5024e7b6a59",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "9b36cf2b-61f0-4eab-a007-d93901b29ca6",
+              "name": "chatId",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "99c7cc91-11f2-4381-989d-343d10dc0e57",
+      "name": "AI Output",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1720,
+        200
+      ],
+      "typeVersion": 3.4
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Router": {
+      "main": [
+        [
+          {
+            "node": "Voice getter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Image Schema1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analyze Photo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Voice": {
+      "main": [
+        [
+          {
+            "node": "Voice Text Converge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Photo": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Text": {
+      "main": [
+        [
+          {
+            "node": "Retrive Memory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Retrive Notes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Data": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Data": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice Text Converge": {
+      "main": [
+        [
+          {
+            "node": "Retrive Memory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Retrive Notes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Photo Text Converge": {
+      "main": [
+        [
+          {
+            "node": "Retrive Memory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Retrive Notes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o-mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Tools Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice getter": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Schema1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Photo Text Converge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        []
+      ]
+    },
+    "Retrive Memory": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrive Notes": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Save Memory Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Tools Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Notes Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Tools Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Tools Agent": {
+      "main": [
+        [
+          {
+            "node": "AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Tools Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Tools Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Output": {
+      "main": [
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "604c47c2-ca1d-4b49-a584-9aa1bfbb7c23",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb467a5c8743521bf121679995921ea7f21304762e395efc5eb988a98ffde56d"
+  },
+  "id": "mcYVV3sR1HMsnWyU",
+  "tags": []
+}
